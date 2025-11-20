@@ -1,0 +1,8 @@
+solara
+geopandas
+leafmap
+ipyleaflet      # 2D 地圖
+rasterio
+xarray
+localtileserver
+maplibre        # 3D 地圖 (maplibregl 用)
