@@ -1,53 +1,58 @@
 import solara
+import importlib.util
+from pathlib import Path
 
-# --- 各頁面的 Wrapper Component ---------------------------------
+# 取得專案根目錄
+ROOT = Path(__file__).parent
 
-@solara.component
-def Home():
-    # 首頁內容
-    with solara.Column():
-        solara.Markdown("# 我的 StoryMap")
-        solara.Markdown(
-            """
-歡迎來到互動式 GIS 故事網站。  
 
-上方的導覽列可以切換不同章節：
-- 01 Intro：故事封面與背景說明
-- 02 2D Map：互動式 2D 故事地圖
-- 03 3D Map：3D 地形視角
-            """
-        )
+def load_page_module(module_name: str, relative_path: str):
+    """手動載入 pages 資料夾裡的 .py 檔，檔名可以是 01_xxx.py 這種。"""
+    file_path = ROOT / relative_path
+    spec = importlib.util.spec_from_file_location(module_name, file_path)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
+
+
+# 載入三個分頁的 Page()
+intro_mod = load_page_module("page_intro", "pages/01_intro.py")
+map2d_mod = load_page_module("page_2d", "pages/02_2d_map.py")
+map3d_mod = load_page_module("page_3d", "pages/03_3d_map.py")
+
+
+# -------- 各頁面的 Wrapper Component --------
 
 @solara.component
 def IntroPage():
-    # 直接呼叫 pages/01_intro.py 裡的 Page()
-    solara.pages["01_intro"].Page()
+    intro_mod.Page()
+
 
 @solara.component
 def Map2DPage():
-    # 直接呼叫 pages/02_2d_map.py 裡的 Page()
-    solara.pages["02_2d_map"].Page()
+    map2d_mod.Page()
+
 
 @solara.component
 def Map3DPage():
-    # 直接呼叫 pages/03_3d_map.py 裡的 Page()
-    solara.pages["03_3d_map"].Page()
+    map3d_mod.Page()
 
-# --- Route 設定 ---------------------------------------------------
+
+# -------- Route 設定 --------
 
 routes = [
-    solara.Route(path="/", component=Home, label="HOME"),
-    solara.Route(path="/01_intro", component=IntroPage, label="01_INTRO"),
+    solara.Route(path="/", component=IntroPage, label="01_INTRO"),
     solara.Route(path="/02_2d_map", component=Map2DPage, label="02_2D_MAP"),
     solara.Route(path="/03_3d_map", component=Map3DPage, label="03_3D_MAP"),
 ]
 
-# --- 主入口 Component ----------------------------------------------
+
+# -------- 主入口 Component --------
 
 @solara.component
 def Page():
-    # 使用 AppLayout，自動產生上方面板 + Route 切換
     solara.AppLayout(
-        title="我的 StoryMap",
+        title="連恆宥的花蓮馬太鞍溪堰塞湖災害地圖",
         routes=routes,
     )
