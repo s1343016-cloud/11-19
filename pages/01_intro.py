@@ -47,18 +47,17 @@ def Page():
             style={"flexWrap": "wrap", "justifyContent": "center"},
         ):
             _photo_card(
-                SPACE_BASE_URL + "images/堰塞湖_01.jpg.jpg",
+                "images/堰塞湖_01.jpg.jpg",
                 "馬太鞍溪上游堰塞湖空拍影像（上游山區被崩塌物與湖水覆蓋）",
             )
             _photo_card(
-                SPACE_BASE_URL + "images/橋梁損毀_02.jpg.jpg",
+                "images/橋梁損毀_02.jpg.jpg",
                 "下游河道暴漲、沖斷橋梁，顯示洪峰能量與夾帶土砂規模",
             )
             _photo_card(
-                SPACE_BASE_URL + "images/土石流_03.jpg",
+                "images/土石流_03.jpg",
                 "土砂與泥流淹沒聚落，搜救人員在受災區域執行任務",
             )
-
         solara.Markdown(
             """
 > 資料整理來源：  
