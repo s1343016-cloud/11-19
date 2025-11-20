@@ -1,37 +1,43 @@
-# pages/03_3d_map.py
+import os
 import solara
 import leafmap.maplibregl as leafmap
 
-def create_3d_map():
-    # 不使用 API Key 的簡單 3D 地圖（類似 PDF 裡的 fallback 寫法）
-    m = leafmap.Map(
-        center=[121.0, 23.7],
-        zoom=7,
-        style="OpenStreetMap",  # 不需金鑰的樣式
-        pitch=60,               # 俯仰角
-        bearing=15              # 旋轉角度
-    )
-    # 高度設定（控制 widget 高度）
-    m.layout.height = "650px"
+MAPTILER_KEY = os.environ.get("MAPTILER_API_KEY", "")
 
-    # 未來如果要 DEM / 3D 地形，可加 add_terrain / add_deckgl_layer
+def create_3d_map():
+    if not MAPTILER_KEY:
+        # 沒 key — 顯示一般底圖
+        m = leafmap.Map(
+            center=[121.0, 23.7],
+            zoom=8,
+            style="OpenStreetMap",
+            pitch=45,
+            bearing=15,
+        )
+        m.layout.height = "700px"
+        return m
+
+    # 有 key — 使用 MapTiler 的 3D 地形
+    style_url = f"https://api.maptiler.com/maps/outdoor-v2/style.json?key={MAPTILER_KEY}"
+
+    m = leafmap.Map(
+        style=style_url,
+        center=[121.0, 23.7],
+        zoom=10,
+        pitch=45,
+        bearing=15,
+    )
+    m.layout.height = "700px"
     return m
 
 @solara.component
 def Page():
-    solara.Title("3D 地形故事地圖")
-
-    map_obj = solara.use_memo(create_3d_map, dependencies=[])
+    map_object = solara.use_memo(create_3d_map, dependencies=[MAPTILER_KEY])
 
     with solara.Column():
-        solara.Markdown("## 故事章節：3D 視角")
-        solara.Markdown(
-            """
-這一頁可以用來：
-- 從 3D 視角觀察地形與空間分布
-- 搭配高度、坡度、視線等分析結果
-            """
-        )
+        if not MAPTILER_KEY:
+            solara.Warning("MapTiler API Key 未設定，目前顯示一般 3D 底圖。")
 
-        with solara.Column(style={"width": "100%", "height": "700px"}):
-            solara.display(map_obj)
+        solara.Markdown("## 我的 3D 主題地形地圖")
+
+        solara.display(map_object.to_solara())
